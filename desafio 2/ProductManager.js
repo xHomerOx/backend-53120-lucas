@@ -2,7 +2,7 @@ const fs = require('fs');
 
 class ProductManager {
     constructor(path) {
-        this.path = path || './ejemplo.json'; 
+        this.path = path || './ejemplo.json';
         this.products = [];
         this.productIdCount = 1;
 
@@ -10,10 +10,15 @@ class ProductManager {
             fs.writeFileSync(this.path, JSON.stringify(this.products, null, "\t"));
         }
 
-        
         setTimeout(() => {
             this.deleteFile();
         }, 6000);
+    }
+
+    findProductById(id) {
+        const fileProducts = this.getProducts();
+        const productIndex = fileProducts.findIndex(product => product.id === id);
+        return { fileProducts, productIndex };
     }
 
     getProducts() {
@@ -32,54 +37,52 @@ class ProductManager {
                 return `Error: field ${field} is missing on the object.`;
             }
         }
-        let fileProducts = this.getProducts();
+        let { fileProducts } = this.findProductById(productObj.id); 
         const newProduct = {
             id: this.productIdCount++,
             ...productObj
         };
         fileProducts.push(newProduct);
-        this._saveProductsToFile(fileProducts);
+        this.saveProductsToFile(fileProducts);
         return "product added.";
     }
 
     getProductById(id) {
-        let fileProducts = this.getProducts();
-        const product = fileProducts.find(product => product.id === id);
-        if (product) {
-            return product;
+        const { fileProducts, productIndex } = this.findProductById(id); 
+        if (productIndex !== -1) {
+            return fileProducts[productIndex];
         } else {
             return " Error: That product doesn't exist."
         }
     }
 
     updateProduct(id, productData) {
-        let fileProducts = this.getProducts();
-        const productIndex = fileProducts.findIndex(product => product.id === id);
-        if (productIndex === -1) {
-            return `Error: Product with id ${id} not found.`
-        }
-
-        for (const field in productData) {
-            if (field !== "id" && productData.hasOwnProperty(field)) {
-                fileProducts[productIndex][field] = productData[field];
+        const { fileProducts, productIndex } = this.findProductById(id); 
+        if (productIndex !== -1) {
+            for (const field in productData) {
+                if (field !== "id" && productData.hasOwnProperty(field)) {
+                    fileProducts[productIndex][field] = productData[field];
+                }
             }
+            this.saveProductsToFile(fileProducts);
+            return "product updated.";
+        } else {
+            return `Error: Product with id ${id} not found.`;
         }
-        this._saveProductsToFile(fileProducts);
-        return "product updated.";
     }
 
     deleteProduct(id) {
-        let fileProducts = this.getProducts();
-        const productIndex = fileProducts.findIndex(product => product.id === id);
-        if (productIndex === -1) {
+        const { fileProducts, productIndex } = this.findProductById(id);
+        if (productIndex !== -1) {
+            fileProducts.splice(productIndex, 1);
+            this.saveProductsToFile(fileProducts);
+            return "Product Deleted";
+        } else {
             return `Error: Product with id ${id} not found.`;
         }
-        fileProducts.splice(productIndex, 1);
-        this._saveProductsToFile(fileProducts);
-        return "Product Deleted";
     }
 
-    _saveProductsToFile(productData) {
+    saveProductsToFile(productData) {
         const data = JSON.stringify(productData, null, 2);
         fs.writeFileSync(this.path, data);
     }
@@ -101,7 +104,7 @@ const miProduct = [
         code: "NIKETEAM",
         stock: 1
     },
-    
+
 ];
 
 for (const productObj of miProduct) {
