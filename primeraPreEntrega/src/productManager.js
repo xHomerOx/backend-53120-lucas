@@ -56,15 +56,15 @@ class ProductManager {
 
     async addProduct(productData) {
         try {
-            const { id } = productData;
+            const id = this.generateUniqueId();
             const existingProduct = this.products.find(product => product.id === id);
             if (existingProduct) {
                 existingProduct.quantity = (existingProduct.quantity || 1) + 1;
             } else {
-                this.products.push({ ...productData, quantity: 1 });
+                this.products.push({ ...productData, id, quantity: 1 });
             }
             await this.saveProductsToFile();
-            return existingProduct || productData;
+            return existingProduct || { ...productData, id };
         } catch (error) {
             throw error;
         }
