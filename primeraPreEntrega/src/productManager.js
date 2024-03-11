@@ -2,7 +2,7 @@ import fs from 'fs';
 
 class ProductManager {
     constructor(path) {
-        this.path = path || './productos.json';
+        this.path = path || './Data/productos.json';
         this.products = [];
 
         if (!fs.existsSync(this.path)) {
