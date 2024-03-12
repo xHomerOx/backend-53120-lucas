@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-class ProductManager {
+export class ProductManager {
     constructor(path) {
         this.path = path || './Data/productos.json';
         this.products = [];
@@ -106,5 +106,3 @@ class ProductManager {
         return maxId + 1;
     }
 }
-
-export default ProductManager;

@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-class CartManager {
+export class CartManager {
     constructor(path) {
         this.path = path || './Data/carts.json';
         this.carts = [];
@@ -31,9 +31,10 @@ class CartManager {
 
     async addProductToCart(cartId, productId) {
         try {
-            const cart = await this.getCartById(cartId);
+            let cart = await this.getCartById(cartId);
             if (!cart) {
-                throw new Error('Cart not found');
+                cart = { id: cartId, products: [] };
+                this.carts.push(cart);
             }
 
             const existingProductIndex = cart.products.findIndex(product => product.id === productId);
@@ -43,7 +44,7 @@ class CartManager {
                 cart.products.push({ id: productId, quantity: 1 });
             }
 
-            await this.updateCart(cartId, cart);
+            await this.saveCartsToFile();
             return cart;
         } catch (error) {
             throw error;
@@ -69,21 +70,6 @@ class CartManager {
             throw error;
         }
     }
-
-    async updateCart(cartId, newData) {
-        try {
-            const index = this.carts.findIndex(cart => cart.id === cartId);
-            if (index !== -1) {
-                this.carts[index] = { ...this.carts[index], ...newData };
-                await this.saveCartsToFile();
-                return this.carts[index];
-            } else {
-                throw new Error(`Cart with ID ${cartId} not found`);
-            }
-        } catch (error) {
-            throw error;
-        }
-    }
 }
 
-export default CartManager;
+
