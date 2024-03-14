@@ -26,7 +26,7 @@ export class ProductManager {
 
     async getProductById(id) {
         try {
-            const product = this.products.find(product => product.id === id);
+            const product = this.products.find(product => product.id == id);
             if (product) {
                 return product;
             } else {
@@ -57,7 +57,7 @@ export class ProductManager {
     async addProduct(productData) {
         try {
             const id = this.generateUniqueId();
-            const existingProduct = this.products.find(product => product.id === id);
+            const existingProduct = this.products.find(product => product.id ==id);
             if (existingProduct) {
                 existingProduct.quantity = (existingProduct.quantity || 1) + 1;
             } else {
@@ -72,7 +72,7 @@ export class ProductManager {
 
     async updateProductById(id, newData) {
         try {
-            const index = this.products.findIndex(product => product.id === id);
+            const index = this.products.findIndex(product => product.id == id);
             if (index !== -1) {
                 this.products[index] = { ...this.products[index], ...newData };
                 await this.saveProductsToFile();
@@ -87,7 +87,7 @@ export class ProductManager {
 
     async deleteProductById(id) {
         try {
-            const index = this.products.findIndex(product => product.id === id);
+            const index = this.products.findIndex(product => product.id == id);
             if (index !== -1) {
                 this.products.splice(index, 1);
                 await this.saveProductsToFile();

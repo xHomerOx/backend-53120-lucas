@@ -1,75 +1,68 @@
-import fs from 'fs';
+import { promises as fs } from "fs";
 
-export class CartManager {
-    constructor(path) {
-        this.path = path || './Data/carts.json';
-        this.carts = [];
+export default class CartManager {
+  constructor(filePath) {
+    this.path = filePath;
+    this.carts = [];
+    this.loadCarts();
+  }
 
-        if (!fs.existsSync(this.path)) {
-            fs.writeFileSync(this.path, JSON.stringify(this.carts, null, "\t"));
-        } else {
-            this.loadCartsFromFile();
-        }
+  async loadCarts() {
+    try {
+      const data = await fs.readFile(this.path, "utf8");
+      this.carts = JSON.parse(data);
+    } catch (error) {
+      console.error("Error loading carts:", error);
     }
+  }
 
-    async saveCartsToFile() {
-        try {
-            await fs.promises.writeFile(this.path, JSON.stringify(this.carts, null, "\t"));
-        } catch (error) {
-            throw error;
-        }
+  async saveCarts() {
+    try {
+      await fs.writeFile(
+        this.path,
+        JSON.stringify(this.carts, null, 2),
+        "utf-8"
+      );
+    } catch (error) {
+      console.error("Error saving carts:", error);
     }
+  }
 
-    async loadCartsFromFile() {
-        try {
-            const data = await fs.promises.readFile(this.path, 'utf8');
-            this.carts = JSON.parse(data);
-        } catch (error) {
-            throw error;
-        }
+  async createCart(initialProducts = []) {
+    const newCart = {
+      id: this.generateUniqueId(),
+      products: initialProducts,
+    };
+    this.carts.push(newCart);
+    await this.saveCarts();
+    return newCart;
+  }
+
+  async getCartProducts(cartId) {
+    const cart = this.carts.find((cart) => cart.id === cartId);
+    return cart ? cart.products : null;
+  }
+
+  async addProductToCart(cartId, productId) {
+    const cart = this.carts.find((cart) => cart.id === cartId);
+    if (cart) {
+      const existingProduct = cart.products.find(
+        (product) => product.id === productId
+      );
+      if (existingProduct) {
+        existingProduct.quantity++;
+      } else {
+        cart.products.push({ id: productId, quantity: 1 });
+      }
+      await this.saveCarts();
+      return cart;
+    } else {
+      console.error(`Cart not found.`);
+      return null;
     }
+  }
 
-    async addProductToCart(cartId, productId) {
-        try {
-            let cart = await this.getCartById(cartId);
-            if (!cart) {
-                cart = { id: cartId, products: [] };
-                this.carts.push(cart);
-            }
-
-            const existingProductIndex = cart.products.findIndex(product => product.id === productId);
-            if (existingProductIndex !== -1) {
-                cart.products[existingProductIndex].quantity++;
-            } else {
-                cart.products.push({ id: productId, quantity: 1 });
-            }
-
-            await this.saveCartsToFile();
-            return cart;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async getProductsInCart(cartId) {
-        try {
-            const cart = await this.getCartById(cartId);
-            if (!cart) {
-                throw new Error('Cart not found');
-            }
-            return cart.products;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async getCartById(cartId) {
-        try {
-            return this.carts.find(cart => cart.id === cartId);
-        } catch (error) {
-            throw error;
-        }
-    }
+  generateUniqueId() {
+    return this.carts.length + 1;
+  }
 }
-
-
