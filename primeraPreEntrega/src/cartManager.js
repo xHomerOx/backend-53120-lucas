@@ -1,8 +1,9 @@
 import { promises as fs } from "fs";
 
 export default class CartManager {
-  constructor(filePath) {
-    this.path = filePath;
+  constructor() {
+    //Sacar argumento del constructor, no lo vas a usar en este caso.
+    this.path = './Data/carts.json';
     this.carts = [];
     this.loadCarts();
   }

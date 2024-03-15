@@ -1,8 +1,9 @@
 import fs from 'fs';
 
-export class ProductManager {
-    constructor(path) {
-        this.path = path || './Data/productos.json';
+export default class ProductManager {
+    constructor() {
+        //sacar el argumento del constructor ya que no lo usas.
+        this.path = './Data/products.json';
         this.products = [];
 
         if (!fs.existsSync(this.path)) {

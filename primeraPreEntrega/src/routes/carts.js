@@ -1,18 +1,21 @@
 import { Router } from "express";
-import { CartManager } from "../cartManager.js";
-import { ProductManager } from "../productManager.js"; 
+import CartManager  from "../cartManager.js";
+import ProductManager from "../productManager.js"; 
 
 const cartsRouter = Router();
-const carts = new CartManager("./Data/carts.json");
-const products = new ProductManager("./Data/products.json");
+
+//Pasar el carts y products in los args.
+const carts = new CartManager();
+const products = new ProductManager();
 
 // Controller de búsqueda por Id
 cartsRouter.get("/:cid", async (req, res) => {
   try {
     const { cid } = req.params;
     const cart = await carts.getCartProducts(cid);
-    if (cart) {
-      res.json(cart);
+    const cartInt = parseInt(cid);
+    if (cartInt) {
+      res.json(cartInt);
     } else {
       res.status(404).send({ error: "Carrito no encontrado" });
     }
